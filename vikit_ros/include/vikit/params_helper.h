@@ -58,7 +58,7 @@ T getParam(const rclcpp::Node::SharedPtr &nh, const std::string& name, const T& 
 }
   
 template<>
-std::string getParam<std::string>(const rclcpp::Node::SharedPtr &nh, const std::string& name, const std::string& defaultValue)
+inline std::string getParam<std::string>(const rclcpp::Node::SharedPtr &nh, const std::string& name, const std::string& defaultValue)
 {
   std::string v;
   if(nh->has_parameter(name))

@@ -12,7 +12,7 @@ def load_depthmap(depthmap_full_file_path, depthmap_rows, depthmap_cols,
     try:
       depth_array = np.fromfile(depthmap_full_file_path, fileformat, -1, '') # the separator character '' specifies a binary file
     except IOError:
-      print 'Could not open file ' + depthmap_full_file_path + ' for reading binary data.'
+      print('Could not open file ' + depthmap_full_file_path + ' for reading binary data.')
       raise
   else: 
     if depthmap_full_file_path.endswith('.depth'):
@@ -22,7 +22,7 @@ def load_depthmap(depthmap_full_file_path, depthmap_rows, depthmap_cols,
         else:
           depth_array = np.fromfile(depthmap_full_file_path, np.float32, -1, ' ') # the separator character ' ' specifies a text file
       except IOError:
-        print 'Could not open file ' + depthmap_full_file_path + ' for reading text data.'
+        print('Could not open file ' + depthmap_full_file_path + ' for reading text data.')
         raise
     else:
       raise MapIOError('Depthmap filename suffix is not correct.')
