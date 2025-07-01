@@ -1,17 +1,15 @@
-#######################################################
-# vikit_common source dir
-set( vikit_common_SOURCE_DIR "@CMAKE_CURRENT_SOURCE_DIR@")
+@PACKAGE_INIT@
 
-#######################################################
-# vikit_common build dir
-set( vikit_common_DIR "@CMAKE_CURRENT_BINARY_DIR@")
+set_and_check(vikit_common_INCLUDE_DIRS "@PACKAGE_INCLUDE_INSTALL_DIR@")
+set_and_check(vikit_common_LIBRARY_DIRS "@PACKAGE_LIB_INSTALL_DIR@")
 
-#######################################################
-set( vikit_common_INCLUDE_DIR  "@vikit_common_INCLUDE_DIR@" )
-set( vikit_common_INCLUDE_DIRS "@vikit_common_INCLUDE_DIR@" )
+find_library(vikit_common_LIBRARIES
+  NAMES vikit_common
+  HINTS "@PACKAGE_LIB_INSTALL_DIR@"
+)
 
-set( vikit_common_LIBRARIES    "@vikit_common_LIBRARIES@" )
-set( vikit_common_LIBRARY      "@vikit_common_LIBRARIES@" )
-
-set( vikit_common_LIBRARY_DIR  "@vikit_common_LIBRARY_DIR@" )
-set( vikit_common_LIBRARY_DIRS "@vikit_common_LIBRARY_DIR@" )
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(vikit_common
+  FOUND_VAR vikit_common_FOUND
+  REQUIRED_VARS vikit_common_LIBRARIES vikit_common_INCLUDE_DIRS
+)

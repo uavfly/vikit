@@ -1,6 +1,6 @@
 SET(PROJECT_NAME vikit_common)
 PROJECT(${PROJECT_NAME})
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.3)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.5)
 SET(CMAKE_BUILD_TYPE Release) # Release, RelWithDebInfo
 SET(CMAKE_VERBOSE_MAKEFILE OFF)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/CMakeModules/")
@@ -28,6 +28,7 @@ ENDIF()
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -fsee -fomit-frame-pointer -fno-signed-zeros -fno-math-errno -funroll-loops")
 
 # Add plain cmake packages 
+find_package(ament_cmake REQUIRED)
 FIND_PACKAGE(OpenCV REQUIRED)
 FIND_PACKAGE(Eigen REQUIRED)
 FIND_PACKAGE(Sophus REQUIRED)
@@ -40,19 +41,8 @@ INCLUDE_DIRECTORIES(
   ${Sophus_INCLUDE_DIRS}
 )
 
-IF(USE_ROS)
-  FIND_PACKAGE(catkin REQUIRED COMPONENTS roscpp cmake_modules)
-  LIST(APPEND INCLUDE_DIRECTORIES ${catkin_INCLUDE_DIRS})
-  catkin_package(
-    DEPENDS Eigen OpenCV Sophus
-    CATKIN_DEPENDS roscpp
-    INCLUDE_DIRS include
-    LIBRARIES ${PROJECT_NAME}
-  )
-ELSE()
-  SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-  SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
-ENDIF()
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 # Set Sourcefiles
 LIST(APPEND SOURCEFILES src/atan_camera.cpp
@@ -73,11 +63,7 @@ ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCEFILES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}
   ${OpenCV_LIBS}
   ${Sophus_LIBRARIES}
-  ${catkin_LIBRARIES})
-
-IF(USE_ROS)
-  TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${catkin_LIBRARIES})
-ENDIF()
+)
 
 # Tests
 ADD_EXECUTABLE(test_vk_common_camera test/test_camera.cpp)
@@ -92,15 +78,21 @@ TARGET_LINK_LIBRARIES(test_vk_common_patch_score ${PROJECT_NAME})
 
 ################################################################################
 # Create the vikit_commonConfig.cmake file for other cmake projects.
-IF(NOT USE_ROS)
-  GET_TARGET_PROPERTY( FULL_LIBRARY_NAME ${PROJECT_NAME} LOCATION )
-  SET(vikit_common_LIBRARIES ${FULL_LIBRARY_NAME} )
-  SET(vikit_common_LIBRARY_DIR ${PROJECT_BINARY_DIR} )
-  SET(vikit_common_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
-  CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/vikit_commonConfig.cmake.in
-      ${CMAKE_CURRENT_BINARY_DIR}/vikit_commonConfig.cmake @ONLY IMMEDIATE )
-  export( PACKAGE vikit_common )
 
-  INSTALL(DIRECTORY include/vikit DESTINATION ${CMAKE_INSTALL_PREFIX}/include FILES_MATCHING PATTERN "*.h" )
-  INSTALL(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib )
-ENDIF()
+install(TARGETS ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+install(DIRECTORY include/
+  DESTINATION include
+)
+
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
+ament_export_dependencies(OpenCV Eigen Sophus)
+
+ament_package()
